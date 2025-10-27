@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+:root {
+  --panel-w-wide: 14rem; /* 224px */
+  --panel-w-narrow: 3.25rem; /* 52px */
+}
