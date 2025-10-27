@@ -1,6 +1,4 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+:root {
+  --panel-w-wide: 14rem; /* 224px */
+  --panel-w-narrow: 3.25rem; /* 52px */
 }
