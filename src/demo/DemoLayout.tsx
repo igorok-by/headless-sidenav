@@ -28,7 +28,7 @@ export function DemoLayout() {
         onSelect={(key) => navigate(`${key}`)}
         expanded={expanded} // controlled expanded (desktop)
         onExpandedChange={setExpanded}
-        mobileOpen={mobileOpen} // controlled mobile sheet (mobile)
+        mobileOpen={mobileOpen} // controlled панель (mobile)
         onMobileOpenChange={setMobileOpen}
         // базовые размеры и позиционирование панели в разных режимах
         className={cn(
