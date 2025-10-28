@@ -272,8 +272,11 @@ const Item = React.forwardRef<HTMLButtonElement, ItemProps>(function Item(
   // на выбор пункта: сообщаем наружу, закрываем аккордеон и мобильную панель
   const selectAndClose = () => {
     onSelect?.(itemKey);
-    openOnly(null, { manual: true });
-    if (variant === 'mobile') setMobileOpen(false);
+
+     if (variant === 'mobile') {
+      setMobileOpen(false);
+      openOnly(null, { manual: true });
+    }
   };
 
   // тут важен порядок: сначала своя функция, затем — потребителя (NavLink)
