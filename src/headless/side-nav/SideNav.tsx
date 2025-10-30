@@ -173,8 +173,21 @@ const SideNavRoot = React.forwardRef<HTMLElement, SideNavProps>(function SideNav
       if (hoverKeyRef.current == null && openKey === forKey) {
         openOnly(null, { manual: true });
       }
-    }, 100);
+    }, 300);
   }, [variant, openKey, openOnly, cancelHoverClose]);
+
+  // 1) При переходе в wide — сбрасываем manualOpen, чтобы авто-раскрытие по активной ветке снова сработало
+  React.useEffect(() => {
+    if (variant === 'wide') setManualOpen(false);
+  }, [variant, setManualOpen]);
+
+  // 2) При переходе в narrow — закрываем аккордеон и сбрасываем hover
+  React.useEffect(() => {
+    if (variant === 'narrow') {
+      openOnly(null, { manual: false });
+      setHoverKey(null);
+    }
+  }, [variant, openOnly, setHoverKey]);
 
   // Собираем контекст (мемо, чтобы не дёргать лишние рендеры)
   const ctx: RootCtx = React.useMemo(() => ({
@@ -267,19 +280,22 @@ const Item = React.forwardRef<HTMLButtonElement, ItemProps>(function Item(
   ref
 ) {
   const { selectedKey, onSelect, variant, setMobileOpen, openOnly } = useRoot();
+  const levelId = React.useContext(LevelContext); // 'root' | submenuKey
   const isActive = selectedKey === itemKey;
 
-  // на выбор пункта: сообщаем наружу, закрываем аккордеон и мобильную панель
+  // по клику сообщаем наружу; на мобиле закрываем, на десктопе - закрываем только если это root item
   const selectAndClose = () => {
     onSelect?.(itemKey);
 
-     if (variant === 'mobile') {
+    if (variant === 'mobile') {
       setMobileOpen(false);
+      openOnly(null, { manual: true });
+    } else if (levelId === 'root') {
       openOnly(null, { manual: true });
     }
   };
 
-  // тут важен порядок: сначала своя функция, затем — потребителя (NavLink)
+  // сначала своя функция, затем потребителя (NavLink)
   const handleClick: React.MouseEventHandler<any> = (e) => {
     selectAndClose();
     (onClick as any)?.(e);
@@ -314,7 +330,7 @@ const useSub = () => {
   const ctx = React.useContext(SubCtx);
 
   if (!ctx) throw new Error('SideNav.Submenu.* must be inside <SideNav.Submenu>');
-  
+
   return ctx;
 };
 
@@ -406,7 +422,18 @@ const SubmenuTrigger = React.forwardRef<HTMLButtonElement, SubmenuTriggerProps>(
     setOpen(next);
   };
 
-  const handleClick = composeHandlers(onClick as any, () => setBoth(!open));
+  const handleClick = composeHandlers(onClick as any, () => {
+    if (variant === 'narrow') {
+      setHoverKey(itemKey);
+
+      if (openKey !== itemKey) openOnly(itemKey, { manual: true });
+
+      setBoth(true);
+      return;
+    }
+
+    setBoth(!open); // wide/mobile - как было
+  });
 
   // Hover-раскрытие (для narrow)
   const handleMouseEnter = composeHandlers(onMouseEnter as any, () => {
@@ -451,8 +478,10 @@ const SubmenuContent = React.forwardRef<HTMLUListElement, SubmenuContentProps>(f
   { onMouseEnter, onMouseLeave, style, children, ...rest },
   ref
 ) {
-  const { variant, setHoverKey, scheduleCloseIfNoHover } = useRoot();
+  const { variant, setHoverKey, scheduleCloseIfNoHover, hoverKey } = useRoot();
   const { open, id, itemKey } = useSub();
+
+  const visible = open && (variant !== 'narrow' || hoverKey === itemKey);
 
   // показываем по open;
   // в mobile стилизуется как панель (через классы у потребителя)
@@ -460,7 +489,7 @@ const SubmenuContent = React.forwardRef<HTMLUListElement, SubmenuContentProps>(f
     <ul
       id={`submenu-${id}`}
       role="group"
-      hidden={!open}
+      hidden={!visible}
       data-open={open || undefined}
       data-variant={variant}
       ref={ref}
