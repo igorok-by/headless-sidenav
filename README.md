@@ -8,7 +8,8 @@
 > Headless-компонент бокового меню с **JSX-API**
 > Поддержка режимов **wide**, **narrow**, **mobile**, интеграция с React Router.
 
-**Task description:** 👉 https://helloclient.notion.site/HelloClient-28cc51068cd580409c8cff7e0eb65b7d
+**Task description:** 👉 https://helloclient.notion.site/HelloClient-28cc51068cd580409c8cff7e0eb65b7d/
+
 **Live Demo:** 👉 https://igorok-by.github.io/headless-sidenav/
 
 ---
